@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>mpd_bringup</name>
+  <version>0.1.0</version>
+  <description>TurtleBot3 + slam_toolbox + Nav2 + explore_lite + RViz2</description>
+  <maintainer email="arouaachref8@gmail.com">Achraf Aroua</maintainer>
+  <license>MIT</license>
+  <exec_depend>turtlebot3_gazebo</exec_depend>
+  <exec_depend>slam_toolbox</exec_depend>
+  <exec_depend>nav2_bringup</exec_depend>
+  <exec_depend>explore_lite</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <export><build_type>ament_python</build_type></export>
+</package>
