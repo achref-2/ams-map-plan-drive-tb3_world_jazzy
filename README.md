@@ -34,22 +34,111 @@ Gazebo (TurtleBot3) ──/scan,/odom──▶ slam_toolbox ──/map──▶ 
 
 ![House map](docs/02_house_map.png)
 
-## How to run
+## Environment setup (from zero)
 
-### 1. Install (once)
+Tested on **Windows 11 with WSL2**. On a native Ubuntu 24.04 PC, skip step 1.
+
+### 1. Windows: install WSL2 with Ubuntu 24.04
+
+In **PowerShell** (as administrator):
+
+```powershell
+wsl --install -d Ubuntu-24.04
+```
+
+Restart if Windows asks. Then open **Ubuntu 24.04** from the Start menu and create a username and password (the password is what `sudo` asks for; nothing shows while you type it).
+
+Check that it runs as WSL **2** and make it the default:
+
+```powershell
+wsl -l -v                         # VERSION column must say 2
+wsl --set-default Ubuntu-24.04    # plain "wsl" now opens 24.04
+```
+
+Graphics (Gazebo, RViz) work through WSLg, which is built into Windows 11. Keep your Windows graphics driver up to date.
+
+### 2. Update Ubuntu
+
+All following commands run in the **Ubuntu 24.04** terminal:
 
 ```bash
-sudo apt install -y ros-jazzy-desktop ros-jazzy-ros-gz \
-  ros-jazzy-turtlebot3 ros-jazzy-turtlebot3-simulations ros-jazzy-turtlebot3-navigation2 \
-  ros-jazzy-navigation2 ros-jazzy-nav2-bringup ros-jazzy-slam-toolbox ros-jazzy-sros2 \
-  python3-colcon-common-extensions python3-rosdep git
+cd ~
+sudo apt update && sudo apt upgrade -y
+```
 
+### 3. Install ROS 2 Jazzy
+
+```bash
+# Language settings
+sudo apt install -y locales software-properties-common curl
+sudo locale-gen en_US en_US.UTF-8
+sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+export LANG=en_US.UTF-8
+sudo add-apt-repository universe -y
+
+# Add the ROS 2 package source
+export ROS_APT_SOURCE_VERSION=$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F\" '{print $4}')
+curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo $VERSION_CODENAME)_all.deb"
+sudo dpkg -i /tmp/ros2-apt-source.deb
+
+# Install ROS 2 Jazzy (a few GB, takes a while)
+sudo apt update
+sudo apt install -y ros-jazzy-desktop
+```
+
+If a step fails, compare with the official guide: docs.ros.org → Jazzy → Installation → Ubuntu (deb packages).
+
+### 4. Install Gazebo Harmonic, TurtleBot3, Nav2, SLAM and SROS2
+
+```bash
+sudo apt install -y ros-jazzy-ros-gz \
+  ros-jazzy-turtlebot3 ros-jazzy-turtlebot3-simulations ros-jazzy-turtlebot3-navigation2 \
+  ros-jazzy-navigation2 ros-jazzy-nav2-bringup \
+  ros-jazzy-slam-toolbox ros-jazzy-sros2 \
+  python3-colcon-common-extensions python3-rosdep git unzip
+```
+
+`ros-jazzy-ros-gz` installs **Gazebo Harmonic** and the ROS–Gazebo bridge.
+
+### 5. Configure the terminal
+
+```bash
 echo 'source /opt/ros/jazzy/setup.bash' >> ~/.bashrc
 echo 'export TURTLEBOT3_MODEL=burger' >> ~/.bashrc
 source ~/.bashrc
+printenv ROS_DISTRO    # should print: jazzy
 ```
 
-### 2. Build the workspace
+### 6. Test the simulation
+
+```bash
+ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+```
+
+Gazebo Harmonic should open with the TurtleBot3 in the hexagon world. In a second Ubuntu tab, drive it with the keyboard (W/A/S/D/X, S = stop):
+
+```bash
+ros2 run turtlebot3_teleop teleop_keyboard
+```
+
+Quick check that ROS graphics work: `rviz2` should open a window.
+
+**If Gazebo stays black or crashes**, use software rendering (slower, so only if needed):
+
+```bash
+echo 'export LIBGL_ALWAYS_SOFTWARE=1' >> ~/.bashrc && source ~/.bashrc
+```
+
+### Tips for WSL
+
+- Keep the workspace in the **Linux home folder** (`~/mpd_ws`), not under `/mnt/c/...`; the Windows drive is much slower.
+- Windows files are under `/mnt/c/Users/<you>/...`, e.g. `cp /mnt/c/Users/<you>/Downloads/file.zip ~/`
+- Linux files in Windows Explorer: `\\wsl$\Ubuntu-24.04\home\<you>`
+- `sudo rosdep init` only works once; "already initialized" later is fine.
+
+## How to run
+
+### 1. Build the workspace
 
 ```bash
 mkdir -p ~/mpd_ws/src && cd ~/mpd_ws/src
@@ -64,7 +153,7 @@ echo 'source ~/mpd_ws/install/setup.bash' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-### 3. Start exploration
+### 2. Start exploration
 
 ```bash
 ros2 launch mpd_bringup exploration.launch.py
