@@ -209,3 +209,10 @@ mpd_bringup/
 - Own frontier-exploration node (M2), compared against explore_lite
 - Attack scenarios and SROS2 security on top of this stack (with Person 2)
 - Evaluation: exploration time, map coverage, latency and CPU load with and without security
+
+## Related
+
+- [ams-map-plan-drive](https://github.com/achref-2/ams-map-plan-drive): the first version of this package on ROS 2 Humble, with the problems I solved along the way
+- [My portfolio](https://achref-2.github.io): the robot at the top of the page runs frontier exploration and A* in the browser
+
+**Author:** Achraf Aroua · [LinkedIn](https://www.linkedin.com/in/achref-aroua/)
